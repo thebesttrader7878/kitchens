@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Kitchens dashboard</title>
+  <link rel="icon" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,650&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+<body class="dash-body">
+  <header class="dash-top">
+    <a class="hud-brand" href="/">kitchens<span class="brand-period">.</span></a>
+    <nav>
+      <button type="button" data-tab="kitchens" class="is-on">Subscriptions</button>
+      <button type="button" data-tab="emails">Emails</button>
+      <button type="button" data-tab="settings">Settings</button>
+    </nav>
+    <a href="/">Open the street</a>
+  </header>
+
+  <section class="dash-login" id="login">
+    <div class="sheet-card">
+      <p class="hud-kicker">Dashboard</p>
+      <h1>Manage the hall.</h1>
+      <p class="lede">Default password is <code>wilsons</code>. Change it after you sign in.</p>
+      <form id="loginForm">
+        <label>
+          Password
+          <input type="password" id="password" required autocomplete="current-password" />
+        </label>
+        <button class="btn btn-gold" type="submit">Sign in</button>
+        <p class="email-status" id="loginErr" hidden></p>
+      </form>
+    </div>
+  </section>
+
+  <main class="dash-main" id="app" hidden>
+    <section class="dash-panel is-on" data-panel="kitchens">
+      <header>
+        <h1>Subscriptions</h1>
+        <p>Wilsons stays #1. Renew, pause, change plan, or cancel a lease. The street updates on refresh.</p>
+        <p class="mrr" id="mrr"></p>
+      </header>
+      <div class="dash-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Shop</th>
+              <th>Owner</th>
+              <th>Plan</th>
+              <th>Status</th>
+              <th>Renews</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="kitchenRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="dash-panel" data-panel="emails">
+      <header>
+        <h1>Email list</h1>
+        <p>People who signed up on the walk-in screen.</p>
+        <button type="button" class="btn btn-gold" id="btnExport" style="width:auto">Export CSV</button>
+      </header>
+      <ul class="dash-emails" id="emailList"></ul>
+    </section>
+
+    <section class="dash-panel" data-panel="settings">
+      <header>
+        <h1>Settings</h1>
+      </header>
+      <form id="pwForm" class="claim-form" style="max-width:420px">
+        <label>
+          New dashboard password
+          <input type="password" id="newPassword" required minlength="4" />
+        </label>
+        <button class="btn btn-gold" type="submit">Save password</button>
+        <p class="email-status" id="pwStatus" hidden></p>
+      </form>
+    </section>
+  </main>
+
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

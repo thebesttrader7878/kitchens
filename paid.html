@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>You’re on the street — Kitchens</title>
+  <link rel="icon" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,650&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+<body class="dash-body">
+  <header class="dash-top">
+    <a class="hud-brand" href="/">kitchens<span class="brand-period">.</span></a>
+    <a href="/">Back to the street</a>
+  </header>
+  <main class="dash-main" style="max-width:520px">
+    <p class="hud-kicker">Payment</p>
+    <h1 id="title">Confirming your lease…</h1>
+    <p class="lede" id="sub">Hang on while Stripe finishes.</p>
+    <div class="pin-box" id="pinBox" hidden>
+      <p class="hud-kicker">Your lease PIN</p>
+      <strong id="pin"></strong>
+      <p>Save this PIN. You’ll need it with your email to manage the shop. Nobody else can change the listing without it.</p>
+      <a class="btn btn-gold" id="manage" href="/my.html">Manage my kitchen</a>
+    </div>
+    <p class="email-status" id="err" hidden></p>
+  </main>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const sid = params.get("session_id");
+    const title = document.getElementById("title");
+    const sub = document.getElementById("sub");
+    const err = document.getElementById("err");
+    const pinBox = document.getElementById("pinBox");
+    const pinEl = document.getElementById("pin");
+    const manage = document.getElementById("manage");
+
+    async function pull() {
+      const r = await fetch("/api/checkout/session?session_id=" + encodeURIComponent(sid));
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || "Payment not finished.");
+      return data.lease;
+    }
+
+    (async () => {
+      if (!sid) {
+        err.hidden = false;
+        err.textContent = "Missing checkout session.";
+        title.textContent = "No payment found.";
+        return;
+      }
+      for (let i = 0; i < 8; i++) {
+        try {
+          const lease = await pull();
+          title.textContent = (lease.name || "Your kitchen") + " is on the street.";
+          sub.textContent = "Write this PIN down. It’s how you prove you own the lease.";
+          pinEl.textContent = lease.pin;
+          pinBox.hidden = false;
+          manage.href = "/my.html?token=" + encodeURIComponent(lease.manageToken || "");
+          try {
+            const key = "kitchens.leaseAuth";
+            const rows = JSON.parse(localStorage.getItem(key) || "[]");
+            localStorage.setItem(key, JSON.stringify(rows.filter((x) => x.id !== lease.id).concat([{
+              id: lease.id, email: lease.email, pin: lease.pin, token: lease.manageToken
+            }])));
+          } catch {}
+          return;
+        } catch (e) {
+          if (i === 7) {
+            err.hidden = false;
+            err.textContent = e.message;
+            title.textContent = "Still confirming…";
+            sub.textContent = "If you were charged, wait a minute and open Manage my kitchen with the email you paid with. The PIN will be on your receipt email from Stripe, or ask the hall admin.";
+          } else {
+            await new Promise((r) => setTimeout(r, 800));
+          }
+        }
+      }
+    })();
+  </script>
+</body>
+</html>

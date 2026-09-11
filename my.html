@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>My kitchen — Kitchens</title>
+  <link rel="icon" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,650&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+<body class="dash-body">
+  <header class="dash-top">
+    <a class="hud-brand" href="/">kitchens<span class="brand-period">.</span></a>
+    <a href="/">Back to the street</a>
+  </header>
+
+  <main class="dash-main">
+    <header>
+      <p class="hud-kicker">Your lease</p>
+      <h1>Manage my kitchen.</h1>
+      <p class="lede">Only the lease holder can get in. Use the email and 6-digit PIN you got when you claimed the shop.</p>
+    </header>
+
+    <form id="lookupForm" class="claim-form" style="max-width:460px">
+      <label>
+        Email on the lease
+        <input type="email" id="lookupEmail" required autocomplete="email" placeholder="you@kitchen.com" />
+      </label>
+      <label>
+        Lease PIN
+        <input id="lookupPin" inputmode="numeric" pattern="[0-9]*" maxlength="6" required placeholder="6-digit PIN" autocomplete="one-time-code" />
+      </label>
+      <button class="btn btn-gold" type="submit">Unlock my kitchen</button>
+      <p class="email-status" id="lookupErr" hidden></p>
+    </form>
+
+    <div id="leases" class="lease-list"></div>
+  </main>
+
+  <script src="js/my.js"></script>
+</body>
+</html>

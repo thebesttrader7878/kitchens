@@ -1,0 +1,8 @@
+.git
+.env
+.env.*
+data/*.json
+**/.DS_Store
+*.tmp
+__pycache__/
+*.pyc

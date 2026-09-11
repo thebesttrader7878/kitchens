@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <meta name="theme-color" content="#0c0b0a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Kitchens — Come see what's cooking.</title>
+  <meta name="description" content="An internet-native food hall. Walk the street, claim a kitchen, and ship real food to people's doors. Wilsons is kitchen #1." />
+  <link rel="icon" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,650;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <main class="kitchens-app" id="app">
+    <section class="play-area" aria-label="Explore Kitchens">
+      <div class="world-canvas" id="world">
+        <canvas id="c"></canvas>
+
+        <div class="cinema-curtain" id="cinema">
+          <strong id="cinemaTitle">Preparing the take</strong>
+          <span id="cinemaSub">Loading the views before the camera moves.</span>
+        </div>
+
+        <div class="parcel-inspection" id="inspect" hidden>
+          <span data-address></span>
+          <strong data-title></strong>
+          <small data-owner></small>
+          <span class="parcel-inspection-hint" data-hint>Click to view</span>
+        </div>
+
+        <button class="camera-mode-button desk-only" id="btnFirstPerson" type="button" aria-pressed="false" title="First person (F)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          <span>First person</span>
+        </button>
+
+        <button class="hud-menu-btn" id="btnMenu" type="button" aria-label="Menu">Menu</button>
+
+        <div class="interact-prompt" id="prompt" hidden>
+          <kbd class="desk-only">E</kbd>
+          <span id="promptText">Order from Wilsons</span>
+        </div>
+
+        <div class="crosshair" id="crosshair" hidden></div>
+      </div>
+
+      <div class="ambient-glow"></div>
+
+      <button class="hud-brand" id="btnAbout" type="button" aria-label="About Kitchens and controls">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 10h18l-2-5H5l-2 5z"/>
+          <path d="M4 10v9h16v-9"/>
+          <path d="M9 19v-5h6v5"/>
+        </svg>
+        <span>kitchens<span class="brand-period">.</span></span>
+      </button>
+
+      <button type="button" class="hud-online" id="online" data-state="pending" aria-live="polite">
+        <i aria-hidden="true"></i>
+        <span>Connecting…</span>
+      </button>
+      <p class="hud-clock" id="kcClock">Kansas City · —</p>
+
+      <div class="hud-left-stack">
+        <section class="hud-radio" id="radio" data-collapsed="true" aria-label="Kitchens Radio">
+          <div class="hud-radio-heading">
+            <button type="button" class="hud-radio-disclosure" id="btnMusic" aria-expanded="false">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M11 4.7 6.4 7.6A1.4 1.4 0 0 1 5.4 8H3v8h2.4a1.4 1.4 0 0 1 1 .4l3.4 3.4a.7.7 0 0 0 1.2-.5V5.2a.7.7 0 0 0-1.2-.5z"/>
+                <path d="M16 9a5 5 0 0 1 0 6"/>
+                <path d="M19.4 18.4a9 9 0 0 0 0-12.8"/>
+              </svg>
+              <span>Music</span>
+            </button>
+          </div>
+          <div class="hud-radio-body">
+            <p class="track-name">Night Service · Kitchen Radio</p>
+            <input type="range" id="vol" min="0" max="1" step="0.01" value="0.35" aria-label="Volume" />
+          </div>
+        </section>
+
+        <section class="hud-kotm">
+          <p class="hud-kicker">Kitchen of the Month</p>
+          <strong>Wilsons</strong>
+          <span>Kansas City · Ships nationwide</span>
+        </section>
+
+        <button type="button" class="hud-claim" id="btnClaimCta">
+          <strong>Claim a kitchen.</strong>
+          <span>Ship real food.</span>
+        </button>
+
+        <button type="button" class="hud-board-link" id="btnBoard">View leaderboard</button>
+        <a class="hud-board-link" href="/my.html">Manage my kitchen</a>
+      </div>
+
+      <div class="hud-right-stack">
+        <button type="button" class="hud-icon" id="btnChat" title="Talk">Talk</button>
+        <div class="hud-controls" id="hudControls">
+          <p class="hud-kicker">Controls</p>
+          <ul>
+            <li><span>Click</span> lock mouse</li>
+            <li><span>WASD</span> walk</li>
+            <li><span>Shift</span> run</li>
+            <li><span>Space</span> jump</li>
+            <li><span>E</span> order / claim</li>
+            <li><span>F</span> first person</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="touch-controls" id="touch" hidden>
+        <div class="stick-wrap">
+          <div class="stick" id="stick"><i></i></div>
+          <span class="touch-label">Move</span>
+        </div>
+        <p class="look-hint" id="lookHint">Drag the hall to look</p>
+        <div class="touch-btns">
+          <button type="button" id="touchJump">Jump</button>
+          <button type="button" id="touchUse">Order</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Boot -->
+  <div class="boot" id="boot">
+    <div class="boot-inner">
+      <p class="boot-brand">kitchens<span>.</span></p>
+      <h1 id="bootTitle">Opening the kitchen.</h1>
+      <p id="bootSub">Getting the latest menus ready.</p>
+      <div class="boot-bar"><i id="bootBar"></i></div>
+    </div>
+  </div>
+
+  <!-- Click to enter -->
+  <div class="enter-gate" id="enter" hidden>
+    <div class="enter-card">
+      <p class="boot-brand">kitchens<span>.</span></p>
+      <div class="email-sign" id="emailSign">
+        <p class="hud-kicker">The list</p>
+        <strong>Leave your email.</strong>
+        <span>We’ll tell you when a kitchen opens — and when Wilsons drops a new pie.</span>
+        <form id="emailForm" class="email-form">
+          <input id="emailInput" type="email" required placeholder="you@email.com" autocomplete="email" inputmode="email" />
+          <button type="submit" class="btn btn-gold" id="btnJoin">Join the list</button>
+        </form>
+        <p class="email-status" id="emailStatus" hidden></p>
+      </div>
+      <button type="button" id="btnEnter">
+        <strong>Walk in</strong>
+        <span class="desk-only">Click to enter in first person</span>
+        <span class="touch-only">Tap to walk · drag to look</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- About -->
+  <aside class="sheet" id="sheetAbout" hidden>
+    <div class="sheet-card">
+      <header>
+        <p class="hud-kicker">About</p>
+        <h2>A digital food hall that ships to your door.</h2>
+        <button type="button" class="sheet-close" data-close>×</button>
+      </header>
+      <p>Kitchens is a walkable restaurant world. People come in, look around, and order real food — packed and delivered to their house. Wilsons is kitchen <em>#1</em>. Every other storefront is for lease.</p>
+      <ul class="about-list">
+        <li>Walk up to a kitchen and tap it to order — food ships to your door.</li>
+        <li>Wilsons ships take-and-bake pizza nationwide from Kansas City.</li>
+        <li>Restaurants pay monthly to claim a storefront on this street.</li>
+      </ul>
+      <button type="button" class="btn btn-gold" id="btnAboutClaim">Claim a kitchen</button>
+    </div>
+  </aside>
+
+  <!-- Leaderboard -->
+  <aside class="sheet" id="sheetBoard" hidden>
+    <div class="sheet-card">
+      <header>
+        <p class="hud-kicker">Leaderboard</p>
+        <h2>Who’s feeding the block.</h2>
+        <button type="button" class="sheet-close" data-close>×</button>
+      </header>
+      <ol class="board" id="boardList"></ol>
+    </div>
+  </aside>
+
+  <!-- Order / kitchen view -->
+  <aside class="sheet sheet-wide" id="sheetKitchen" hidden>
+    <div class="sheet-card kitchen-card">
+      <button type="button" class="sheet-close" data-close>×</button>
+      <div class="kitchen-hero" id="kitchenHero">
+        <p class="hud-kicker" id="kitchenAddr">Kitchen 01</p>
+        <h2 id="kitchenName">Wilsons</h2>
+        <p id="kitchenMeta">Kansas City · Since 1993</p>
+      </div>
+      <div class="kitchen-body" id="kitchenBody"></div>
+    </div>
+  </aside>
+
+  <!-- Claim -->
+  <aside class="sheet sheet-wide" id="sheetClaim" hidden>
+    <div class="sheet-card">
+      <header>
+        <p class="hud-kicker">Lease a storefront</p>
+        <h2>Put your restaurant on the street.</h2>
+        <button type="button" class="sheet-close" data-close>×</button>
+      </header>
+      <p class="lede">Wilsons holds kitchen #1. After you claim, you’ll get a 6-digit PIN. Only that PIN plus your email can manage the lease — so nobody else can take the shop.</p>
+
+      <form id="claimForm" class="claim-form">
+        <div class="field-row">
+          <label>
+            Restaurant name
+            <input name="name" required placeholder="e.g. Redbird BBQ" maxlength="40" />
+          </label>
+          <label>
+            Your name
+            <input name="owner" required placeholder="Chef / owner" maxlength="40" />
+          </label>
+        </div>
+        <div class="field-row">
+          <label>
+            Email
+            <input name="email" type="email" required placeholder="you@kitchen.com" />
+          </label>
+          <label>
+            Cuisine
+            <input name="cuisine" required placeholder="Pizza, tacos, ramen…" maxlength="32" />
+          </label>
+        </div>
+        <label>
+          Order URL (Shopify, Toast, your site)
+          <input name="url" type="url" placeholder="https://…" />
+        </label>
+        <label>
+          One-line pitch
+          <input name="tagline" maxlength="80" placeholder="Ships smoked brisket nationwide." />
+        </label>
+
+        <p class="hud-kicker">Look of the shop</p>
+        <div class="look-row">
+          <label>
+            Storefront
+            <input type="color" name="color" id="claimColor" value="#c41e3a" />
+          </label>
+          <label>
+            Accent / sign
+            <input type="color" name="accent" id="claimAccent" value="#e2b657" />
+          </label>
+        </div>
+        <div class="swatches" id="swatches" role="list">
+          <button type="button" class="swatch" data-color="#c41e3a" data-accent="#e2b657" style="background:#c41e3a" aria-label="Wilsons red"></button>
+          <button type="button" class="swatch" data-color="#1a1a1a" data-accent="#f4efe6" style="background:#1a1a1a" aria-label="Black"></button>
+          <button type="button" class="swatch" data-color="#1e3a5f" data-accent="#e2b657" style="background:#1e3a5f" aria-label="Navy"></button>
+          <button type="button" class="swatch" data-color="#2f4f3a" data-accent="#f4efe6" style="background:#2f4f3a" aria-label="Forest"></button>
+          <button type="button" class="swatch" data-color="#8b3a2a" data-accent="#e2b657" style="background:#8b3a2a" aria-label="Brick"></button>
+          <button type="button" class="swatch" data-color="#4a2c6a" data-accent="#e2b657" style="background:#4a2c6a" aria-label="Purple"></button>
+          <button type="button" class="swatch" data-color="#d4783a" data-accent="#1a1a1a" style="background:#d4783a" aria-label="Orange"></button>
+          <button type="button" class="swatch" data-color="#f4efe6" data-accent="#c41e3a" style="background:#f4efe6" aria-label="Cream"></button>
+        </div>
+        <label class="logo-field">
+          Your logo
+          <input type="file" id="claimLogo" accept="image/*" />
+          <div class="logo-preview" id="logoPreview">
+            <span>PNG or JPG · square works best</span>
+          </div>
+        </label>
+
+        <p class="hud-kicker">Pick a kitchen</p>
+        <div class="plot-grid" id="plotGrid"></div>
+
+        <p class="hud-kicker">Plan</p>
+        <div class="plans" id="plans">
+          <label class="plan">
+            <input type="radio" name="plan" value="stall" />
+            <span>
+              <strong>Stall</strong>
+              <em>$149 / mo</em>
+              Compact storefront. One menu board.
+            </span>
+          </label>
+          <label class="plan">
+            <input type="radio" name="plan" value="kitchen" checked />
+            <span>
+              <strong>Kitchen</strong>
+              <em>$249 / mo</em>
+              Full storefront. Featured on the street.
+            </span>
+          </label>
+          <label class="plan">
+            <input type="radio" name="plan" value="corner" />
+            <span>
+              <strong>Corner</strong>
+              <em>$399 / mo</em>
+              Prime plot. Bigger sign, more foot traffic.
+            </span>
+          </label>
+        </div>
+
+        <div class="pay-box">
+          <p>You’ll pay on Stripe — Stall $149 / Kitchen $249 / Corner $399 a month. The shop goes live after the first payment. You’ll get a PIN only you can use to manage the lease.</p>
+          <button type="submit" class="btn btn-gold" id="btnPay">Pay with Stripe</button>
+        </div>
+      </form>
+    </div>
+  </aside>
+
+  <!-- Mobile menu -->
+  <aside class="sheet" id="sheetMenu" hidden>
+    <div class="sheet-card">
+      <header>
+        <p class="hud-kicker">Menu</p>
+        <h2>The hall.</h2>
+        <button type="button" class="sheet-close" data-close>×</button>
+      </header>
+      <div class="menu-actions">
+        <button type="button" class="menu-row" id="menuClaim">
+          <strong>Claim a kitchen</strong>
+          <span>Pay for a storefront. Ship real food.</span>
+        </button>
+        <a class="menu-row" href="/my.html">
+          <strong>My kitchen</strong>
+          <span>Update your shop, plan, or cancel the lease.</span>
+        </a>
+        <button type="button" class="menu-row" id="menuBoard">
+          <strong>Leaderboard</strong>
+          <span>Wilsons is #1 · 1,127 shipped</span>
+        </button>
+        <button type="button" class="menu-row" id="menuAbout">
+          <strong>About</strong>
+          <span>How the food hall works</span>
+        </button>
+        <button type="button" class="menu-row" id="menuChat">
+          <strong>Talk</strong>
+          <span>Say something in the hall</span>
+        </button>
+        <button type="button" class="menu-row" id="menuMusic">
+          <strong>Music</strong>
+          <span>Night Service · Kitchen Radio</span>
+        </button>
+      </div>
+      <p class="touch-help">Joystick to walk. Drag the screen to look. Tap a kitchen to order.</p>
+    </div>
+  </aside>
+
+  <!-- Chat -->
+  <aside class="chat-dock" id="chatDock" hidden>
+    <header>
+      <strong>Talk</strong>
+      <button type="button" data-close>×</button>
+    </header>
+    <div class="chat-log" id="chatLog"></div>
+    <form id="chatForm">
+      <input id="chatInput" maxlength="140" placeholder="Say something in the hall…" autocomplete="off" />
+      <button type="submit">Send</button>
+    </form>
+  </aside>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
