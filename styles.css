@@ -20,6 +20,21 @@ button, input { font-family: inherit; }
 button { cursor: pointer; touch-action: manipulation; }
 a, label, .hud-tap, .parcel-inspection, .menu-row, .plot { touch-action: manipulation; }
 canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+html.is-touch canvas { pointer-events: none !important; }
+.look-surface {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  touch-action: none;
+}
+html.is-touch button,
+html.is-touch a.btn,
+html.is-touch .hud-tap,
+html.is-touch .menu-row {
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
 .touch-only { display: none; }
 .hud-menu-btn { display: none; }
 kbd {
@@ -52,6 +67,9 @@ kbd {
 .hud-layer .hud-radio,
 .hud-layer .hud-controls {
   pointer-events: auto;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  position: relative;
 }
 .ambient-glow {
   pointer-events: none;
@@ -255,7 +273,8 @@ kbd {
 .enter-gate #btnEnter span { color: var(--muted); font-size: 13px; }
 
 body.has-sheet .world-canvas,
-body.has-sheet .hud-layer {
+body.has-sheet .hud-layer,
+body.has-sheet .look-surface {
   visibility: hidden;
   pointer-events: none;
 }

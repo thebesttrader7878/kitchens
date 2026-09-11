@@ -55,19 +55,31 @@ function viewportSize() {
   return {
     w: Math.round(vv?.width || innerWidth),
     h: Math.round(vv?.height || innerHeight),
+    x: Math.round(vv?.offsetLeft || 0),
+    y: Math.round(vv?.offsetTop || 0),
   };
 }
 
 function resize() {
-  const { w, h } = viewportSize();
+  const { w, h, x, y } = viewportSize();
+  if (isTouch) {
+    const app = document.getElementById("app");
+    app.style.position = "fixed";
+    app.style.left = `${x}px`;
+    app.style.top = `${y}px`;
+    app.style.width = `${w}px`;
+    app.style.height = `${h}px`;
+    canvas.style.pointerEvents = "none";
+  }
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
   renderer.setSize(w, h, false);
-  canvas.style.width = `${w}px`;
-  canvas.style.height = `${h}px`;
+  canvas.style.width = "100%";
+  canvas.style.height = "100%";
 }
 addEventListener("resize", resize);
 visualViewport?.addEventListener("resize", resize);
+visualViewport?.addEventListener("scroll", resize);
 resize();
 
 bindTap(document.getElementById("btnFirstPerson"), () => setFirstPerson(!firstPerson));
@@ -100,7 +112,10 @@ async function walkIn() {
   musicOn = true;
   await toggleMusic(true);
   document.getElementById("radio").dataset.collapsed = "false";
-  if (isTouch) document.getElementById("touch").hidden = false;
+  if (isTouch) {
+    document.getElementById("touch").hidden = false;
+    document.getElementById("lookSurface").hidden = false;
+  }
   player.spawn();
   setFirstPerson(true);
 }
@@ -224,6 +239,7 @@ if (isTouch) setupTouch();
 
 function setupTouch() {
   const stick = document.getElementById("stick");
+  const lookSurface = document.getElementById("lookSurface");
   const nub = stick.querySelector("i");
   const origin = { x: 0, y: 0 };
   let moveId = null;
@@ -267,7 +283,7 @@ function setupTouch() {
     applyStick(t);
   }, { passive: false });
 
-  canvas.addEventListener("touchstart", (e) => {
+  lookSurface.addEventListener("touchstart", (e) => {
     if (ui.sheetOpen || player.frozen || !firstPerson) return;
     const t = e.changedTouches[0];
     if (!t || t.identifier === moveId) return;
@@ -276,7 +292,7 @@ function setupTouch() {
     lastLook.y = t.clientY;
   }, { passive: true });
 
-  canvas.addEventListener("touchmove", (e) => {
+  lookSurface.addEventListener("touchmove", (e) => {
     if (lookId == null) return;
     e.preventDefault();
     for (const t of e.changedTouches) {
@@ -321,18 +337,31 @@ function setupTouch() {
   jump.addEventListener("pointerdown", jumpOn);
   jump.addEventListener("pointerup", jumpOff);
   jump.addEventListener("pointercancel", jumpOff);
+  bindTap(document.getElementById("touchUse"), () => ui.useNearby());
 
-  const order = document.getElementById("touchUse");
-  let orderAt = 0;
-  const orderNow = (e) => {
+  const TAP = "button, a, .hud-tap, .menu-row, .plot, .parcel-inspection, [data-close]";
+  let tapX = 0;
+  let tapY = 0;
+  let tapAt = 0;
+  document.addEventListener("touchstart", (e) => {
+    const t = e.changedTouches[0];
+    if (!t) return;
+    tapX = t.clientX;
+    tapY = t.clientY;
+    tapAt = performance.now();
+  }, { passive: true });
+  document.addEventListener("touchend", (e) => {
+    if (performance.now() - tapAt > 450) return;
+    const t = e.changedTouches[0];
+    if (!t || Math.hypot(t.clientX - tapX, t.clientY - tapY) > 20) return;
+    const hit = document.elementFromPoint(t.clientX, t.clientY);
+    const btn = hit?.closest?.(TAP);
+    if (!btn || btn.id === "touchJump" || btn.closest("#stick")) return;
+    if (btn.tagName === "A" && btn.getAttribute("href")) return;
+    if (btn.closest("form") && btn.type === "submit") return;
     e.preventDefault();
-    e.stopPropagation();
-    if (performance.now() - orderAt < 400) return;
-    orderAt = performance.now();
-    ui.useNearby();
-  };
-  order.addEventListener("pointerdown", orderNow);
-  order.addEventListener("touchstart", orderNow, { passive: false });
+    btn.click();
+  }, { passive: false });
 }
 
 boot().catch((err) => {

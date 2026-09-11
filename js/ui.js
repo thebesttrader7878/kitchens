@@ -365,20 +365,15 @@ export function bindTap(el, fn) {
   el.dataset.tapBound = "1";
   let last = 0;
   const run = (e) => {
-    if (e.type === "pointerdown" && e.button && e.button !== 0) return;
     const now = performance.now();
-    if (now - last < 400) {
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
+    if (now - last < 400) return;
     last = now;
-    e.preventDefault();
-    e.stopPropagation();
     fn(e);
   };
-  el.addEventListener("pointerdown", run);
-  el.addEventListener("touchstart", run, { passive: false });
+  el.addEventListener("click", (e) => {
+    e.stopPropagation();
+    run(e);
+  });
 }
 
 function $(sel) {
