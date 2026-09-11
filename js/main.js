@@ -338,30 +338,6 @@ function setupTouch() {
   jump.addEventListener("pointerup", jumpOff);
   jump.addEventListener("pointercancel", jumpOff);
   bindTap(document.getElementById("touchUse"), () => ui.useNearby());
-
-  const TAP = "button, a, .hud-tap, .menu-row, .plot, .parcel-inspection, [data-close]";
-  let tapX = 0;
-  let tapY = 0;
-  let tapAt = 0;
-  document.addEventListener("touchstart", (e) => {
-    const t = e.changedTouches[0];
-    if (!t) return;
-    tapX = t.clientX;
-    tapY = t.clientY;
-    tapAt = performance.now();
-  }, { passive: true });
-  document.addEventListener("touchend", (e) => {
-    if (performance.now() - tapAt > 450) return;
-    const t = e.changedTouches[0];
-    if (!t || Math.hypot(t.clientX - tapX, t.clientY - tapY) > 20) return;
-    const hit = document.elementFromPoint(t.clientX, t.clientY);
-    const btn = hit?.closest?.(TAP);
-    if (!btn || btn.id === "touchJump" || btn.closest("#stick")) return;
-    if (btn.tagName === "A" && btn.getAttribute("href")) return;
-    if (btn.closest("form") && btn.type === "submit") return;
-    e.preventDefault();
-    btn.click();
-  }, { passive: false });
 }
 
 boot().catch((err) => {

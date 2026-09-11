@@ -368,10 +368,17 @@ export function bindTap(el, fn) {
   let last = 0;
   const run = (e) => {
     const now = performance.now();
-    if (now - last < 400) return;
+    if (now - last < 400) {
+      if (e.cancelable) e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
     last = now;
+    if (e.cancelable) e.preventDefault();
+    e.stopPropagation();
     fn(e);
   };
+  el.addEventListener("touchstart", run, { passive: false });
   el.addEventListener("click", (e) => {
     e.stopPropagation();
     run(e);
