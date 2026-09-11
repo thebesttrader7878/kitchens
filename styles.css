@@ -32,7 +32,27 @@ kbd {
 }
 
 .kitchens-app, .play-area, .world-canvas { height: 100%; width: 100%; position: relative; }
-.world-canvas { background: #070605; }
+.world-canvas { background: #070605; z-index: 0; }
+.hud-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+.hud-layer .touch-controls { pointer-events: none; }
+.hud-layer button,
+.hud-layer a,
+.hud-layer input,
+.hud-layer .hud-tap,
+.hud-layer .stick-wrap,
+.hud-layer .stick,
+.hud-layer .touch-btns,
+.hud-layer .hud-radio,
+.hud-layer .hud-controls {
+  pointer-events: auto;
+}
 .ambient-glow {
   pointer-events: none;
   position: absolute; inset: 0;
@@ -381,6 +401,7 @@ input[type="text"], input[type="email"], input[type="url"], input:not([type]) {
   width: 110px; height: 110px; border-radius: 50%;
   border: 1px solid var(--line); background: rgba(0,0,0,0.35);
   pointer-events: auto; position: relative;
+  touch-action: none;
 }
 .stick i {
   position: absolute; width: 42px; height: 42px; border-radius: 50%;
@@ -451,25 +472,33 @@ input[type="text"], input[type="email"], input[type="url"], input:not([type]) {
   .parcel-inspection {
     left: 12px;
     right: 12px;
-    bottom: max(148px, calc(env(safe-area-inset-bottom) + 136px));
+    bottom: max(132px, calc(env(safe-area-inset-bottom) + 120px));
     transform: none;
     min-width: 0;
     width: auto;
-    padding: 12px 14px;
+    padding: 10px 12px;
     border-radius: 14px;
     pointer-events: auto;
     z-index: 22;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    text-align: left;
   }
-  .parcel-inspection strong { font-size: 20px; }
+  .parcel-inspection span[data-address],
+  .parcel-inspection small { display: none; }
+  .parcel-inspection strong { font-size: 16px; }
   .parcel-inspection-hint {
     display: inline-block;
-    margin-top: 6px;
-    padding: 6px 10px;
+    margin: 0;
+    padding: 8px 12px;
     border-radius: 999px;
     background: var(--gold);
     color: #0c0b0a;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
+    flex: 0 0 auto;
   }
 
   .interact-prompt { display: none !important; }

@@ -352,23 +352,21 @@ export function bindTap(el, fn) {
   el.dataset.tapBound = "1";
   let last = 0;
   const run = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    last = performance.now();
-    fn(e);
-  };
-  el.addEventListener("pointerup", (e) => {
-    if (e.pointerType === "mouse" && e.button !== 0) return;
-    run(e);
-  });
-  el.addEventListener("click", (e) => {
-    if (performance.now() - last < 450) {
+    const now = performance.now();
+    if (now - last < 400) {
       e.preventDefault();
       e.stopPropagation();
       return;
     }
-    run(e);
-  });
+    last = now;
+    e.preventDefault();
+    e.stopPropagation();
+    fn(e);
+  };
+  el.addEventListener("pointerdown", (e) => e.stopPropagation());
+  el.addEventListener("touchstart", (e) => e.stopPropagation(), { passive: true });
+  el.addEventListener("touchend", run, { passive: false });
+  el.addEventListener("click", run);
 }
 
 function $(sel) {

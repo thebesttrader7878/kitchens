@@ -29,6 +29,12 @@ export class Player {
       ONE: THREE.TOUCH.ROTATE,
       TWO: THREE.TOUCH.DOLLY_PAN,
     };
+    if (touch) {
+      this.orbit.enabled = false;
+      this.orbit.enableRotate = false;
+      this.orbit.enablePan = false;
+      this.orbit.enableZoom = false;
+    }
     camera.position.set(8, 10, -6);
 
     addEventListener("keydown", (e) => this.onKey(e, true));

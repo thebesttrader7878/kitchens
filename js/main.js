@@ -232,69 +232,73 @@ function setupTouch() {
 
   const setNub = (x, y) => {
     const s = stick.clientWidth;
-    const n = nub.offsetWidth || 52;
+    const n = nub.offsetWidth || 48;
     const mid = (s - n) / 2;
     nub.style.left = `${mid + x * (s * 0.28)}px`;
     nub.style.top = `${mid + y * (s * 0.28)}px`;
   };
 
-  const onStick = (t) => {
-    const r = stick.getBoundingClientRect();
-    return t.clientX >= r.left - 8 && t.clientX <= r.right + 8 && t.clientY >= r.top - 8 && t.clientY <= r.bottom + 8;
+  const applyStick = (t) => {
+    let x = (t.clientX - origin.x) / 48;
+    let y = (t.clientY - origin.y) / 48;
+    const m = Math.hypot(x, y) || 1;
+    if (m > 1) { x /= m; y /= m; }
+    player.stick.x = x;
+    player.stick.z = -y;
+    setNub(x, y);
   };
 
-  const hudSel = "button, a, input, textarea, select, label, .hud-tap, .touch-controls, .parcel-inspection, .sheet, .chat-dock, .boot, .enter-gate";
-  const onHud = (t) => {
-    const el = document.elementFromPoint(t.clientX, t.clientY);
-    return !!(el && el.closest && el.closest(hudSel));
+  const stopStick = () => {
+    moveId = null;
+    player.stick.x = 0;
+    player.stick.z = 0;
+    setNub(0, 0);
   };
 
-  addEventListener("touchstart", (e) => {
-    if (ui.sheetOpen || player.frozen) return;
-    for (const t of e.changedTouches) {
-      if (onHud(t)) continue;
-      if (onStick(t) && moveId == null) {
-        moveId = t.identifier;
-        origin.x = t.clientX;
-        origin.y = t.clientY;
-      } else if (lookId == null && !onStick(t)) {
-        lookId = t.identifier;
-        lastLook.x = t.clientX;
-        lastLook.y = t.clientY;
-      }
-    }
+  stick.addEventListener("touchstart", (e) => {
+    if (ui.sheetOpen) return;
+    const t = e.changedTouches[0];
+    if (!t) return;
+    e.preventDefault();
+    e.stopPropagation();
+    moveId = t.identifier;
+    origin.x = t.clientX;
+    origin.y = t.clientY;
+    applyStick(t);
+  }, { passive: false });
+
+  canvas.addEventListener("touchstart", (e) => {
+    if (ui.sheetOpen || player.frozen || !firstPerson) return;
+    const t = e.changedTouches[0];
+    if (!t || t.identifier === moveId) return;
+    lookId = t.identifier;
+    lastLook.x = t.clientX;
+    lastLook.y = t.clientY;
   }, { passive: true });
 
-  addEventListener("touchmove", (e) => {
-    let used = false;
+  canvas.addEventListener("touchmove", (e) => {
+    if (lookId == null) return;
+    e.preventDefault();
     for (const t of e.changedTouches) {
-      if (t.identifier === moveId) {
-        used = true;
-        let x = (t.clientX - origin.x) / 48;
-        let y = (t.clientY - origin.y) / 48;
-        const m = Math.hypot(x, y) || 1;
-        if (m > 1) { x /= m; y /= m; }
-        player.stick.x = x;
-        player.stick.z = -y;
-        setNub(x, y);
-      } else if (t.identifier === lookId && firstPerson) {
-        used = true;
-        player.look(t.clientX - lastLook.x, t.clientY - lastLook.y);
-        lastLook.x = t.clientX;
-        lastLook.y = t.clientY;
-      }
+      if (t.identifier !== lookId) continue;
+      player.look(t.clientX - lastLook.x, t.clientY - lastLook.y);
+      lastLook.x = t.clientX;
+      lastLook.y = t.clientY;
     }
-    if (used) e.preventDefault();
+  }, { passive: false });
+
+  addEventListener("touchmove", (e) => {
+    if (moveId == null) return;
+    for (const t of e.changedTouches) {
+      if (t.identifier !== moveId) continue;
+      e.preventDefault();
+      applyStick(t);
+    }
   }, { passive: false });
 
   const endTouch = (e) => {
     for (const t of e.changedTouches) {
-      if (t.identifier === moveId) {
-        moveId = null;
-        player.stick.x = 0;
-        player.stick.z = 0;
-        setNub(0, 0);
-      }
+      if (t.identifier === moveId) stopStick();
       if (t.identifier === lookId) lookId = null;
     }
   };
@@ -302,23 +306,22 @@ function setupTouch() {
   addEventListener("touchcancel", endTouch);
 
   const jump = document.getElementById("touchJump");
-  jump.addEventListener("pointerdown", (e) => {
+  const jumpOn = (e) => {
     e.preventDefault();
     e.stopPropagation();
     player.keys.space = true;
-  });
-  jump.addEventListener("pointerup", (e) => {
+  };
+  const jumpOff = (e) => {
     e.stopPropagation();
     player.keys.space = false;
-  });
-  jump.addEventListener("pointercancel", () => { player.keys.space = false; });
+  };
+  jump.addEventListener("touchstart", jumpOn, { passive: false });
+  jump.addEventListener("touchend", jumpOff);
+  jump.addEventListener("touchcancel", jumpOff);
+  jump.addEventListener("pointerdown", jumpOn);
+  jump.addEventListener("pointerup", jumpOff);
+  jump.addEventListener("pointercancel", jumpOff);
   bindTap(document.getElementById("touchUse"), () => ui.useNearby());
-
-  document.body.addEventListener("touchmove", (e) => {
-    if (ui.sheetOpen) return;
-    if (e.target.closest?.(hudSel)) return;
-    if (e.target === canvas || e.target.closest?.(".world-canvas")) e.preventDefault();
-  }, { passive: false });
 }
 
 boot().catch((err) => {
