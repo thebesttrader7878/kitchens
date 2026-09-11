@@ -166,7 +166,7 @@ function nearbyKitchen() {
   // fallback: distance to kitchen fronts
   const p = camera.position;
   let best = null;
-  let bestD = 5.5;
+  let bestD = 8;
   for (const k of kitchens) {
     const frontZ = k.facing === 0 ? k.z - k.d / 2 : k.z + k.d / 2;
     const d = Math.hypot(p.x - k.x, p.z - frontZ);

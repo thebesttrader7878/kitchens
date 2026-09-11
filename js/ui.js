@@ -145,6 +145,7 @@ export class UI {
   inspect(k) {
     if (!k) {
       this.els.inspect.hidden = true;
+      this.els.inspect.classList.remove("is-on");
       this.els.prompt.hidden = true;
       this.active = null;
       this.syncUseBtn(null);
@@ -153,13 +154,14 @@ export class UI {
     this.active = k;
     const addr = `Kitchen ${String(k.number).padStart(2, "0")}`;
     this.els.inspect.hidden = false;
+    this.els.inspect.classList.add("is-on");
     this.els.inspect.querySelector("[data-address]").textContent = addr;
     this.els.inspect.querySelector("[data-title]").textContent = k.name;
     this.els.inspect.querySelector("[data-owner]").textContent =
       k.status === "open" ? `$${PLAN_PRICE[k.plan]}/mo · available` : `${k.owner} · ${k.cuisine || "Food"}`;
     const tap = this.touch ? "Tap" : "Click";
     this.els.inspect.querySelector("[data-hint]").textContent =
-      k.status === "open" ? `${tap} to lease` : `${tap} to order · ships to your door`;
+      k.status === "open" ? `${tap} to lease` : `${tap} to order`;
     this.els.prompt.hidden = false;
     this.els.promptText.textContent =
       k.status === "open" ? `Claim kitchen ${k.number}` : `Order from ${k.name}`;

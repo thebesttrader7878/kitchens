@@ -67,9 +67,6 @@ kbd {
 .hud-layer .hud-radio,
 .hud-layer .hud-controls {
   pointer-events: auto;
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-  position: relative;
 }
 .ambient-glow {
   pointer-events: none;
@@ -92,8 +89,11 @@ kbd {
 
 /* Inspect */
 .parcel-inspection {
-  position: absolute; left: 50%; bottom: 96px;
-  transform: translateX(-50%);
+  position: absolute;
+  left: 50%;
+  bottom: 96px;
+  transform: translateX(-50%) translateZ(0);
+  -webkit-transform: translateX(-50%) translateZ(0);
   cursor: pointer;
   background: var(--panel);
   backdrop-filter: blur(12px);
@@ -101,9 +101,13 @@ kbd {
   padding: 12px 16px 14px;
   min-width: 220px;
   text-align: center;
-  z-index: 22;
+  z-index: 40;
   color: inherit;
   font: inherit;
+  display: none;
+}
+.parcel-inspection.is-on {
+  display: block !important;
 }
 .parcel-inspection span[data-address] {
   display: block;
@@ -504,35 +508,34 @@ input[type="text"], input[type="email"], input[type="url"], input:not([type]) {
     left: 12px;
     right: 12px;
     bottom: max(132px, calc(env(safe-area-inset-bottom) + 120px));
-    transform: none;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
     min-width: 0;
     width: auto;
-    padding: 10px 12px;
+    padding: 12px 14px;
     border-radius: 14px;
     pointer-events: auto;
-    z-index: 22;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
+    z-index: 40;
     text-align: left;
   }
-  .parcel-inspection span[data-address],
-  .parcel-inspection small { display: none; }
-  .parcel-inspection strong { font-size: 16px; }
+  .parcel-inspection.is-on {
+    display: block !important;
+  }
+  .parcel-inspection strong { font-size: 20px; }
   .parcel-inspection-hint {
     display: inline-block;
-    margin: 0;
+    margin-top: 8px;
     padding: 8px 12px;
     border-radius: 999px;
     background: var(--gold);
     color: #0c0b0a;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
-    flex: 0 0 auto;
   }
 
-  .interact-prompt { display: none !important; }
+  .interact-prompt {
+    display: none !important;
+  }
 
   .touch-controls {
     display: flex;
