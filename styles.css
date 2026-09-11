@@ -17,7 +17,8 @@ html, body { margin: 0; height: 100%; height: 100dvh; background: var(--bg); col
 body { position: fixed; inset: 0; width: 100%; }
 input, textarea { -webkit-user-select: text; user-select: text; }
 button, input { font-family: inherit; }
-button { cursor: pointer; }
+button { cursor: pointer; touch-action: manipulation; }
+a, label, .hud-tap, .parcel-inspection, .menu-row, .plot { touch-action: manipulation; }
 canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 .touch-only { display: none; }
 .hud-menu-btn { display: none; }
@@ -62,7 +63,9 @@ kbd {
   padding: 12px 16px 14px;
   min-width: 220px;
   text-align: center;
-  z-index: 8;
+  z-index: 22;
+  color: inherit;
+  font: inherit;
 }
 .parcel-inspection span[data-address] {
   display: block;
@@ -203,6 +206,12 @@ kbd {
   gap: 16px;
   text-align: center;
 }
+.enter-pitch {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.45;
+}
 .email-sign {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -227,7 +236,7 @@ kbd {
 
 /* Sheets */
 .sheet {
-  position: fixed; inset: 0; z-index: 30;
+  position: fixed; inset: 0; z-index: 50;
   background: rgba(0,0,0,0.55);
   display: grid; place-items: center;
   padding: 24px;
@@ -366,7 +375,7 @@ input[type="text"], input[type="email"], input[type="url"], input:not([type]) {
 .touch-controls {
   position: absolute; inset: auto 18px 18px 18px;
   display: flex; justify-content: space-between; align-items: flex-end;
-  z-index: 10; pointer-events: none;
+  z-index: 22; pointer-events: none;
 }
 .stick {
   width: 110px; height: 110px; border-radius: 50%;
@@ -387,11 +396,11 @@ input[type="text"], input[type="email"], input[type="url"], input:not([type]) {
   position: absolute;
   top: max(12px, env(safe-area-inset-top));
   right: max(12px, env(safe-area-inset-right));
-  z-index: 12;
+  z-index: 22;
   background: var(--panel);
   color: var(--cream);
   border: 1px solid var(--line);
-  padding: 10px 14px;
+  padding: 10px 16px;
   border-radius: 999px;
   font-size: 14px;
   font-weight: 600;
@@ -421,66 +430,100 @@ input[type="text"], input[type="email"], input[type="url"], input:not([type]) {
 @media (max-width: 820px), (pointer: coarse) {
   .desk-only { display: none !important; }
   .touch-only { display: revert; }
-  .hud-menu-btn { display: inline-flex; align-items: center; }
+  .hud-menu-btn { display: inline-flex; align-items: center; z-index: 22; }
   .hud-left-stack,
   .hud-right-stack,
   .hud-online,
-  .camera-mode-button { display: none !important; }
-  .hud-clock {
-    display: block !important;
-    left: max(12px, env(safe-area-inset-left));
-    top: max(44px, calc(env(safe-area-inset-top) + 36px));
-    bottom: auto;
-  }
+  .hud-clock,
+  .look-hint,
+  .camera-mode-button,
+  .crosshair { display: none !important; }
 
   .hud-brand {
     left: max(12px, env(safe-area-inset-left));
     bottom: auto;
     top: max(12px, env(safe-area-inset-top));
-    font-size: 20px;
-    z-index: 12;
+    font-size: 18px;
+    z-index: 22;
+    pointer-events: auto;
   }
 
   .parcel-inspection {
-    left: 12px; right: 12px; bottom: 168px;
+    left: 12px;
+    right: 12px;
+    bottom: max(148px, calc(env(safe-area-inset-bottom) + 136px));
     transform: none;
     min-width: 0;
-    padding: 14px 16px 16px;
+    width: auto;
+    padding: 12px 14px;
     border-radius: 14px;
+    pointer-events: auto;
+    z-index: 22;
   }
-  .parcel-inspection strong { font-size: 22px; }
-  .parcel-inspection-hint { font-size: 13px; }
+  .parcel-inspection strong { font-size: 20px; }
+  .parcel-inspection-hint {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: var(--gold);
+    color: #0c0b0a;
+    font-size: 12px;
+    font-weight: 600;
+  }
 
   .interact-prompt { display: none !important; }
-  .look-hint { display: block; }
 
   .touch-controls {
     display: flex;
     left: max(12px, env(safe-area-inset-left));
     right: max(12px, env(safe-area-inset-right));
     bottom: max(12px, env(safe-area-inset-bottom));
+    z-index: 22;
   }
   .stick {
-    width: 128px; height: 128px;
+    width: 112px; height: 112px;
     background: rgba(12,11,10,0.45);
   }
-  .stick i { width: 52px; height: 52px; left: 38px; top: 38px; }
-  .touch-btns { gap: 10px; }
-  .touch-btns button {
-    width: 72px; height: 72px; font-size: 13px; font-weight: 600;
+  .stick i { width: 48px; height: 48px; left: 32px; top: 32px; }
+  .touch-btns {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
   }
-  #touchUse { background: var(--gold); color: #0c0b0a; width: 88px; }
+  .touch-jump {
+    width: 52px;
+    height: 52px;
+    font-size: 11px;
+  }
+  .touch-use,
+  #touchUse {
+    width: auto;
+    min-width: 132px;
+    height: 56px;
+    border-radius: 16px;
+    background: var(--gold);
+    color: #0c0b0a;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 0 16px;
+  }
 
   .boot h1 { font-size: 28px; padding: 0 16px; }
-  .enter-gate { padding: 16px; background: rgba(7,6,5,0.55); }
+  .enter-gate { padding: 16px; background: rgba(7,6,5,0.72); }
   .enter-gate #btnEnter {
     width: 100%;
     padding: 18px 20px;
     min-height: 72px;
     border-radius: 16px;
+    background: var(--gold);
+    color: #0c0b0a;
+    border: 0;
   }
-  .enter-gate #btnEnter strong { font-size: 28px; }
-  .enter-gate #btnEnter span { display: block; margin-top: 6px; font-size: 14px; }
+  .enter-gate #btnEnter strong { font-size: 28px; color: #0c0b0a; }
+  .enter-gate #btnEnter span { display: block; margin-top: 6px; font-size: 14px; color: #3a341f; }
+  .email-sign { padding: 16px; }
+  .email-sign strong { font-size: 20px; }
 
   .sheet {
     align-items: end;
@@ -517,11 +560,16 @@ input[type="text"], input[type="email"], input[type="url"], input:not([type]) {
     left: 0; right: 0; bottom: 0; width: auto;
     max-height: 55dvh;
     border-radius: 16px 16px 0 0;
+    z-index: 45;
+  }
+  .hud-tap, button, a.btn, .parcel-inspection, .menu-row {
+    -webkit-tap-highlight-color: rgba(226, 182, 87, 0.28);
   }
 }
 
 @media (max-width: 420px) {
-  .stick { width: 112px; height: 112px; }
-  .stick i { left: 32px; top: 32px; }
-  .parcel-inspection { bottom: 156px; }
+  .stick { width: 100px; height: 100px; }
+  .stick i { left: 28px; top: 28px; width: 44px; height: 44px; }
+  .parcel-inspection { bottom: max(136px, calc(env(safe-area-inset-bottom) + 124px)); }
+  .touch-use, #touchUse { min-width: 118px; height: 52px; font-size: 14px; }
 }

@@ -34,13 +34,6 @@
           <span id="cinemaSub">Loading the views before the camera moves.</span>
         </div>
 
-        <div class="parcel-inspection" id="inspect" hidden>
-          <span data-address></span>
-          <strong data-title></strong>
-          <small data-owner></small>
-          <span class="parcel-inspection-hint" data-hint>Click to view</span>
-        </div>
-
         <button class="camera-mode-button desk-only" id="btnFirstPerson" type="button" aria-pressed="false" title="First person (F)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
             <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"></path>
@@ -48,8 +41,6 @@
           </svg>
           <span>First person</span>
         </button>
-
-        <button class="hud-menu-btn" id="btnMenu" type="button" aria-label="Menu">Menu</button>
 
         <div class="interact-prompt" id="prompt" hidden>
           <kbd class="desk-only">E</kbd>
@@ -61,7 +52,16 @@
 
       <div class="ambient-glow"></div>
 
-      <button class="hud-brand" id="btnAbout" type="button" aria-label="About Kitchens and controls">
+      <button class="hud-menu-btn hud-tap" id="btnMenu" type="button" aria-label="Menu">Menu</button>
+
+      <button type="button" class="parcel-inspection hud-tap" id="inspect" hidden>
+        <span data-address></span>
+        <strong data-title></strong>
+        <small data-owner></small>
+        <span class="parcel-inspection-hint" data-hint>Tap to order</span>
+      </button>
+
+      <button class="hud-brand hud-tap" id="btnAbout" type="button" aria-label="About Kitchens and controls">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M3 10h18l-2-5H5l-2 5z"/>
           <path d="M4 10v9h16v-9"/>
@@ -127,12 +127,10 @@
       <div class="touch-controls" id="touch" hidden>
         <div class="stick-wrap">
           <div class="stick" id="stick"><i></i></div>
-          <span class="touch-label">Move</span>
         </div>
-        <p class="look-hint" id="lookHint">Drag the hall to look</p>
         <div class="touch-btns">
-          <button type="button" id="touchJump">Jump</button>
-          <button type="button" id="touchUse">Order</button>
+          <button type="button" class="touch-jump hud-tap" id="touchJump" aria-label="Jump">Jump</button>
+          <button type="button" class="touch-use hud-tap" id="touchUse">Order Wilsons</button>
         </div>
       </div>
     </section>
@@ -152,21 +150,22 @@
   <div class="enter-gate" id="enter" hidden>
     <div class="enter-card">
       <p class="boot-brand">kitchens<span>.</span></p>
+      <p class="enter-pitch">Walk the street. Order real food. We ship it to your door.</p>
+      <button type="button" id="btnEnter" class="hud-tap">
+        <strong>Walk in</strong>
+        <span class="desk-only">Click to enter in first person</span>
+        <span class="touch-only">Joystick to walk · drag to look · tap Order</span>
+      </button>
       <div class="email-sign" id="emailSign">
         <p class="hud-kicker">The list</p>
-        <strong>Leave your email.</strong>
-        <span>We’ll tell you when a kitchen opens — and when Wilsons drops a new pie.</span>
+        <strong>Get Wilsons drops.</strong>
+        <span>New pies and open storefronts — no spam.</span>
         <form id="emailForm" class="email-form">
           <input id="emailInput" type="email" required placeholder="you@email.com" autocomplete="email" inputmode="email" />
           <button type="submit" class="btn btn-gold" id="btnJoin">Join the list</button>
         </form>
         <p class="email-status" id="emailStatus" hidden></p>
       </div>
-      <button type="button" id="btnEnter">
-        <strong>Walk in</strong>
-        <span class="desk-only">Click to enter in first person</span>
-        <span class="touch-only">Tap to walk · drag to look</span>
-      </button>
     </div>
   </div>
 
@@ -330,9 +329,13 @@
         <button type="button" class="sheet-close" data-close>×</button>
       </header>
       <div class="menu-actions">
+        <button type="button" class="menu-row" id="menuOrder">
+          <strong>Order from Wilsons</strong>
+          <span>Take-and-bake pizza, shipped to your door.</span>
+        </button>
         <button type="button" class="menu-row" id="menuClaim">
-          <strong>Claim a kitchen</strong>
-          <span>Pay for a storefront. Ship real food.</span>
+          <strong>Lease a kitchen</strong>
+          <span>$149–$399 a month. Shop goes live after payment.</span>
         </button>
         <a class="menu-row" href="/my.html">
           <strong>My kitchen</strong>
@@ -355,7 +358,7 @@
           <span>Night Service · Kitchen Radio</span>
         </button>
       </div>
-      <p class="touch-help">Joystick to walk. Drag the screen to look. Tap a kitchen to order.</p>
+      <p class="touch-help">Joystick walks. Drag the hall to look. Gold button orders.</p>
     </div>
   </aside>
 

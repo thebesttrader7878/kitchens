@@ -35,36 +35,33 @@ export class UI {
     };
 
     this.touch = document.documentElement.classList.contains("is-touch");
-    $("#btnAbout").onclick = () => this.open("sheetAbout");
-    $("#btnBoard").onclick = () => this.openBoard();
-    $("#btnClaimCta").onclick = () => this.openClaim();
-    $("#btnAboutClaim").onclick = () => this.openClaim();
-    $("#btnChat").onclick = () => this.toggleChat();
-    $("#btnMenu")?.addEventListener("click", () => this.open("sheetMenu"));
-    $("#menuClaim")?.addEventListener("click", () => this.openClaim());
-    $("#menuBoard")?.addEventListener("click", () => this.openBoard());
-    $("#menuAbout")?.addEventListener("click", () => this.open("sheetAbout"));
-    $("#menuChat")?.addEventListener("click", () => { this.closeAll(); this.toggleChat(); });
-    $("#btnMusic").onclick = () => {
+    bindTap($("#btnAbout"), () => this.open("sheetAbout"));
+    bindTap($("#btnBoard"), () => this.openBoard());
+    bindTap($("#btnClaimCta"), () => this.openClaim());
+    bindTap($("#btnAboutClaim"), () => this.openClaim());
+    bindTap($("#btnChat"), () => this.toggleChat());
+    bindTap($("#btnMenu"), () => this.open("sheetMenu"));
+    bindTap($("#menuOrder"), () => this.openKitchen(this.flagship()));
+    bindTap($("#menuClaim"), () => this.openClaim());
+    bindTap($("#menuBoard"), () => this.openBoard());
+    bindTap($("#menuAbout"), () => this.open("sheetAbout"));
+    bindTap($("#menuChat"), () => { this.closeAll(); this.toggleChat(); });
+    bindTap($("#btnMusic"), () => {
       const r = this.els.radio;
       const on = r.dataset.collapsed === "true";
       r.dataset.collapsed = on ? "false" : "true";
       $("#btnMusic").setAttribute("aria-expanded", String(on));
-    };
+    });
     for (const btn of document.querySelectorAll("[data-close]")) {
-      btn.onclick = () => this.closeAll();
+      bindTap(btn, () => this.closeAll());
     }
     for (const sheet of document.querySelectorAll(".sheet")) {
       sheet.addEventListener("click", (e) => {
         if (e.target === sheet) this.closeAll();
       });
     }
-    this.els.inspect.onclick = () => {
-      if (this.active) this.openKitchen(this.active);
-    };
-    $("#prompt").onclick = () => {
-      if (this.active) this.openKitchen(this.active);
-    };
+    bindTap(this.els.inspect, () => this.useNearby());
+    bindTap($("#prompt"), () => this.useNearby());
     $("#claimForm").onsubmit = (e) => this.submitClaim(e);
     $("#chatForm").onsubmit = (e) => {
       e.preventDefault();
@@ -125,11 +122,30 @@ export class UI {
     this.els.online.querySelector("span").textContent = `${count} on the street`;
   }
 
+  flagship() {
+    return this.kitchens.find((k) => k.id === "k1") || this.kitchens[0];
+  }
+
+  useNearby() {
+    this.openKitchen(this.active || this.flagship());
+  }
+
+  syncUseBtn(k) {
+    const use = document.getElementById("touchUse");
+    if (!use) return;
+    if (!k) {
+      use.textContent = "Order Wilsons";
+      return;
+    }
+    use.textContent = k.status === "open" ? "Lease this" : `Order ${k.name}`;
+  }
+
   inspect(k) {
     if (!k) {
       this.els.inspect.hidden = true;
       this.els.prompt.hidden = true;
       this.active = null;
+      this.syncUseBtn(null);
       return;
     }
     this.active = k;
@@ -141,10 +157,11 @@ export class UI {
       k.status === "open" ? `$${PLAN_PRICE[k.plan]}/mo · available` : `${k.owner} · ${k.cuisine || "Food"}`;
     const tap = this.touch ? "Tap" : "Click";
     this.els.inspect.querySelector("[data-hint]").textContent =
-      k.status === "open" ? `${tap} to claim` : `${tap} to order`;
+      k.status === "open" ? `${tap} to lease` : `${tap} to order · ships to your door`;
     this.els.prompt.hidden = false;
     this.els.promptText.textContent =
       k.status === "open" ? `Claim kitchen ${k.number}` : `Order from ${k.name}`;
+    this.syncUseBtn(k);
   }
 
   openKitchen(k) {
@@ -328,6 +345,30 @@ export class UI {
     this.els.chatLog.appendChild(p);
     this.els.chatLog.scrollTop = this.els.chatLog.scrollHeight;
   }
+}
+
+export function bindTap(el, fn) {
+  if (!el || el.dataset.tapBound === "1") return;
+  el.dataset.tapBound = "1";
+  let last = 0;
+  const run = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    last = performance.now();
+    fn(e);
+  };
+  el.addEventListener("pointerup", (e) => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    run(e);
+  });
+  el.addEventListener("click", (e) => {
+    if (performance.now() - last < 450) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    run(e);
+  });
 }
 
 function $(sel) {

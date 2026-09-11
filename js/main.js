@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { mergeKitchens, fetchRemoteClaims, applyClaims } from "./data.js";
 import { World } from "./world.js";
 import { Player } from "./player.js";
-import { UI } from "./ui.js";
+import { UI, bindTap } from "./ui.js";
 import { toggleMusic, setVolume, ensureAudio } from "./audio.js";
 import { missouriLabel } from "./clock.js";
 
@@ -70,8 +70,8 @@ addEventListener("resize", resize);
 visualViewport?.addEventListener("resize", resize);
 resize();
 
-document.getElementById("btnFirstPerson").onclick = () => setFirstPerson(!firstPerson);
-document.getElementById("btnEnter").onclick = () => walkIn();
+bindTap(document.getElementById("btnFirstPerson"), () => setFirstPerson(!firstPerson));
+bindTap(document.getElementById("btnEnter"), () => walkIn());
 document.getElementById("emailForm")?.addEventListener("submit", async (e) => {
   e.preventDefault();
   const input = document.getElementById("emailInput");
@@ -105,7 +105,7 @@ async function walkIn() {
   setFirstPerson(true);
 }
 document.getElementById("vol").oninput = (e) => setVolume(e.target.value);
-document.getElementById("menuMusic")?.addEventListener("click", async () => {
+bindTap(document.getElementById("menuMusic"), async () => {
   ui.closeAll();
   await ensureAudio();
   musicOn = !musicOn;
@@ -126,8 +126,8 @@ addEventListener("keydown", (e) => {
 });
 
 renderer.domElement.addEventListener("click", () => {
-  if (ui.sheetOpen) return;
-  if (!isTouch && firstPerson && !player.locked) {
+  if (ui.sheetOpen || isTouch) return;
+  if (firstPerson && !player.locked) {
     player.lock();
     return;
   }
@@ -137,7 +137,7 @@ renderer.domElement.addEventListener("click", () => {
 function setFirstPerson(on) {
   firstPerson = on;
   document.getElementById("btnFirstPerson").setAttribute("aria-pressed", String(on));
-  document.getElementById("crosshair").hidden = !on;
+  document.getElementById("crosshair").hidden = !on || isTouch;
   player.setMode(on ? "first" : "orbit");
 }
 
@@ -225,7 +225,6 @@ if (isTouch) setupTouch();
 function setupTouch() {
   const stick = document.getElementById("stick");
   const nub = stick.querySelector("i");
-  const hint = document.getElementById("lookHint");
   const origin = { x: 0, y: 0 };
   let moveId = null;
   let lookId = null;
@@ -244,19 +243,21 @@ function setupTouch() {
     return t.clientX >= r.left - 8 && t.clientX <= r.right + 8 && t.clientY >= r.top - 8 && t.clientY <= r.bottom + 8;
   };
 
+  const hudSel = "button, a, input, textarea, select, label, .hud-tap, .touch-controls, .parcel-inspection, .sheet, .chat-dock, .boot, .enter-gate";
   const onHud = (t) => {
     const el = document.elementFromPoint(t.clientX, t.clientY);
-    return el && el.closest && el.closest(".hud-brand, .hud-menu-btn, .parcel-inspection, .interact-prompt, .touch-btns, .sheet, .chat-dock, .boot, .enter-gate");
+    return !!(el && el.closest && el.closest(hudSel));
   };
 
   addEventListener("touchstart", (e) => {
     if (ui.sheetOpen || player.frozen) return;
     for (const t of e.changedTouches) {
+      if (onHud(t)) continue;
       if (onStick(t) && moveId == null) {
         moveId = t.identifier;
         origin.x = t.clientX;
         origin.y = t.clientY;
-      } else if (lookId == null && !onHud(t) && !onStick(t)) {
+      } else if (lookId == null && !onStick(t)) {
         lookId = t.identifier;
         lastLook.x = t.clientX;
         lastLook.y = t.clientY;
@@ -281,7 +282,6 @@ function setupTouch() {
         player.look(t.clientX - lastLook.x, t.clientY - lastLook.y);
         lastLook.x = t.clientX;
         lastLook.y = t.clientY;
-        if (hint) hint.hidden = true;
       }
     }
     if (used) e.preventDefault();
@@ -301,12 +301,22 @@ function setupTouch() {
   addEventListener("touchend", endTouch);
   addEventListener("touchcancel", endTouch);
 
-  document.getElementById("touchJump").onpointerdown = (e) => { e.preventDefault(); player.keys.space = true; };
-  document.getElementById("touchJump").onpointerup = () => { player.keys.space = false; };
-  document.getElementById("touchUse").onclick = () => { if (ui.active) ui.openKitchen(ui.active); };
+  const jump = document.getElementById("touchJump");
+  jump.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    player.keys.space = true;
+  });
+  jump.addEventListener("pointerup", (e) => {
+    e.stopPropagation();
+    player.keys.space = false;
+  });
+  jump.addEventListener("pointercancel", () => { player.keys.space = false; });
+  bindTap(document.getElementById("touchUse"), () => ui.useNearby());
 
   document.body.addEventListener("touchmove", (e) => {
     if (ui.sheetOpen) return;
+    if (e.target.closest?.(hudSel)) return;
     if (e.target === canvas || e.target.closest?.(".world-canvas")) e.preventDefault();
   }, { passive: false });
 }
