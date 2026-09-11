@@ -254,12 +254,24 @@ kbd {
 .enter-gate #btnEnter strong { display: block; font-family: var(--serif); font-size: 28px; }
 .enter-gate #btnEnter span { color: var(--muted); font-size: 13px; }
 
+body.has-sheet .world-canvas,
+body.has-sheet .hud-layer {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 /* Sheets */
 .sheet {
-  position: fixed; inset: 0; z-index: 50;
-  background: rgba(0,0,0,0.55);
-  display: grid; place-items: center;
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.72);
+  display: none;
+  place-items: center;
   padding: 24px;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+.sheet.is-open {
+  display: grid !important;
 }
 .sheet-card {
   background: #141210;

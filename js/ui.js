@@ -56,8 +56,10 @@ export class UI {
       bindTap(btn, () => this.closeAll());
     }
     for (const sheet of document.querySelectorAll(".sheet")) {
-      sheet.addEventListener("click", (e) => {
-        if (e.target === sheet) this.closeAll();
+      sheet.addEventListener("pointerdown", (e) => {
+        if (e.target !== sheet) return;
+        if (performance.now() - (this.openedAt || 0) < 700) return;
+        this.closeAll();
       });
     }
     bindTap(this.els.inspect, () => this.useNearby());
@@ -165,6 +167,8 @@ export class UI {
   }
 
   openKitchen(k) {
+    if (!k) k = this.flagship();
+    if (!k) return;
     this.onNeedPointer?.(false);
     if (k.status === "open") return this.openClaim(k.id);
     this.els.kitchenAddr.textContent = `Kitchen ${String(k.number).padStart(2, "0")}`;
@@ -317,14 +321,23 @@ export class UI {
   open(id) {
     this.closeAll();
     this.onNeedPointer?.(false);
-    this.els[id].hidden = false;
+    this.openedAt = performance.now();
+    const el = this.els[id];
+    if (!el) return;
+    el.hidden = false;
+    el.classList.add("is-open");
+    document.body.classList.add("has-sheet");
   }
 
   closeAll() {
     for (const id of ["sheetAbout", "sheetBoard", "sheetKitchen", "sheetClaim", "sheetMenu"]) {
-      if (this.els[id]) this.els[id].hidden = true;
+      if (this.els[id]) {
+        this.els[id].hidden = true;
+        this.els[id].classList.remove("is-open");
+      }
     }
     this.els.chatDock.hidden = true;
+    document.body.classList.remove("has-sheet");
   }
 
   get sheetOpen() {
@@ -352,6 +365,7 @@ export function bindTap(el, fn) {
   el.dataset.tapBound = "1";
   let last = 0;
   const run = (e) => {
+    if (e.type === "pointerdown" && e.button && e.button !== 0) return;
     const now = performance.now();
     if (now - last < 400) {
       e.preventDefault();
@@ -363,10 +377,8 @@ export function bindTap(el, fn) {
     e.stopPropagation();
     fn(e);
   };
-  el.addEventListener("pointerdown", (e) => e.stopPropagation());
-  el.addEventListener("touchstart", (e) => e.stopPropagation(), { passive: true });
-  el.addEventListener("touchend", run, { passive: false });
-  el.addEventListener("click", run);
+  el.addEventListener("pointerdown", run);
+  el.addEventListener("touchstart", run, { passive: false });
 }
 
 function $(sel) {

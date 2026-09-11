@@ -321,7 +321,18 @@ function setupTouch() {
   jump.addEventListener("pointerdown", jumpOn);
   jump.addEventListener("pointerup", jumpOff);
   jump.addEventListener("pointercancel", jumpOff);
-  bindTap(document.getElementById("touchUse"), () => ui.useNearby());
+
+  const order = document.getElementById("touchUse");
+  let orderAt = 0;
+  const orderNow = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (performance.now() - orderAt < 400) return;
+    orderAt = performance.now();
+    ui.useNearby();
+  };
+  order.addEventListener("pointerdown", orderNow);
+  order.addEventListener("touchstart", orderNow, { passive: false });
 }
 
 boot().catch((err) => {
