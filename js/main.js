@@ -113,7 +113,7 @@ async function walkIn() {
   await toggleMusic(true);
   document.getElementById("radio").dataset.collapsed = "false";
   if (isTouch) {
-    document.getElementById("touch").hidden = false;
+    document.getElementById("phoneHud").hidden = false;
     document.getElementById("lookSurface").hidden = false;
   }
   player.spawn();
@@ -334,10 +334,27 @@ function setupTouch() {
   jump.addEventListener("touchstart", jumpOn, { passive: false });
   jump.addEventListener("touchend", jumpOff);
   jump.addEventListener("touchcancel", jumpOff);
-  jump.addEventListener("pointerdown", jumpOn);
-  jump.addEventListener("pointerup", jumpOff);
-  jump.addEventListener("pointercancel", jumpOff);
-  bindTap(document.getElementById("touchUse"), () => ui.useNearby());
+
+  const press = (el, fn) => {
+    if (!el) return;
+    const go = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      fn();
+    };
+    el.addEventListener("touchstart", go, { passive: false });
+  };
+  press(document.getElementById("touchUse"), () => ui.useNearby());
+  press(document.getElementById("btnMenu"), () => ui.open("sheetMenu"));
+  press(document.getElementById("inspect"), () => ui.useNearby());
+  press(document.getElementById("menuOrder"), () => ui.openKitchen(ui.flagship()));
+  press(document.getElementById("menuClaim"), () => ui.openClaim());
+  press(document.getElementById("menuBoard"), () => ui.openBoard());
+  press(document.getElementById("menuAbout"), () => ui.open("sheetAbout"));
+  press(document.getElementById("btnEnter"), () => walkIn());
+  for (const btn of document.querySelectorAll("[data-close]")) {
+    press(btn, () => ui.closeAll());
+  }
 }
 
 boot().catch((err) => {

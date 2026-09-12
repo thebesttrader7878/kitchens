@@ -54,15 +54,6 @@
       <div class="look-surface" id="lookSurface" hidden></div>
 
       <div class="hud-layer">
-      <button class="hud-menu-btn hud-tap" id="btnMenu" type="button" aria-label="Menu">Menu</button>
-
-      <button type="button" class="parcel-inspection hud-tap" id="inspect" hidden>
-        <span data-address></span>
-        <strong data-title></strong>
-        <small data-owner></small>
-        <span class="parcel-inspection-hint" data-hint>Tap to order</span>
-      </button>
-
       <button class="hud-brand hud-tap" id="btnAbout" type="button" aria-label="About Kitchens and controls">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M3 10h18l-2-5H5l-2 5z"/>
@@ -126,15 +117,20 @@
         </div>
       </div>
 
-      <div class="touch-controls" id="touch" hidden>
-        <div class="stick-wrap">
-          <div class="stick" id="stick"><i></i></div>
-        </div>
-        <div class="touch-btns">
-          <button type="button" class="touch-jump hud-tap" id="touchJump" aria-label="Jump">Jump</button>
-          <button type="button" class="touch-use hud-tap" id="touchUse">Order Wilsons</button>
-        </div>
       </div>
+
+      <div class="parcel-inspection" id="inspect" hidden>
+        <span data-address></span>
+        <strong data-title></strong>
+        <small data-owner></small>
+        <span class="parcel-inspection-hint" data-hint>Tap to order</span>
+      </div>
+
+      <div class="phone-hud" id="phoneHud" hidden>
+        <div class="phone-menu" id="btnMenu" role="button" aria-label="Menu">Menu</div>
+        <div class="phone-stick" id="stick"><i></i></div>
+        <div class="phone-jump" id="touchJump" role="button">Jump</div>
+        <div class="phone-order" id="touchUse" role="button">Order Wilsons</div>
       </div>
     </section>
   </main>

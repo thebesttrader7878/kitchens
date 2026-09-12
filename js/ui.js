@@ -328,6 +328,7 @@ export class UI {
     if (!el) return;
     el.hidden = false;
     el.classList.add("is-open");
+    el.style.display = "grid";
     document.body.classList.add("has-sheet");
   }
 
@@ -336,6 +337,7 @@ export class UI {
       if (this.els[id]) {
         this.els[id].hidden = true;
         this.els[id].classList.remove("is-open");
+        this.els[id].style.display = "";
       }
     }
     this.els.chatDock.hidden = true;
