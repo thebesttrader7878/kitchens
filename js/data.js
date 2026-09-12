@@ -148,6 +148,10 @@ export function applyClaims(kitchens, claims) {
       k.name = "Available";
       k.owner = "";
       k.logo = "";
+      k.cuisine = "";
+      k.tagline = "Pay for this storefront. Ship real food.";
+      k.url = "";
+      k.email = "";
       continue;
     }
     Object.assign(k, {
@@ -170,6 +174,12 @@ export function applyClaims(kitchens, claims) {
 
 export function mergeKitchens() {
   return applyClaims(baseKitchens(), loadClaims());
+}
+
+export function kitchensFingerprint(list) {
+  return list
+    .map((k) => [k.id, k.status, k.name, k.logo || "", k.color || "", k.url || "", k.tagline || "", k.plan || ""].join("|"))
+    .join(";");
 }
 
 export function hashColor(str) {

@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { mergeKitchens, fetchRemoteClaims, applyClaims } from "./data.js";
+import { mergeKitchens, fetchRemoteClaims, applyClaims, kitchensFingerprint } from "./data.js";
 import { World } from "./world.js";
 import { Player } from "./player.js";
 import { UI, bindTap } from "./ui.js";
@@ -216,7 +216,23 @@ async function boot() {
   clock = new THREE.Clock();
   tickClock();
   setInterval(tickClock, 1000);
+  setInterval(syncLeases, 8000);
   tick();
+}
+
+async function syncLeases() {
+  if (document.hidden) return;
+  const before = kitchensFingerprint(kitchens);
+  const remote = await fetchRemoteClaims();
+  applyClaims(kitchens, remote);
+  if (kitchensFingerprint(kitchens) === before) return;
+  for (const k of kitchens) {
+    if (k.id === "k1") continue;
+    world.refreshKitchen(k);
+  }
+  ui.renderGuide();
+  ui.renderBoard();
+  if (!ui.els.sheetClaim || ui.els.sheetClaim.hidden) ui.renderPlots();
 }
 
 async function flyIn() {
