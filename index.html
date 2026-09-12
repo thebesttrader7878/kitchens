@@ -93,9 +93,13 @@
           <span>Kansas City · Ships nationwide</span>
         </section>
 
+        <button type="button" class="hud-claim" id="btnGuideCta">
+          <strong>See restaurants</strong>
+          <span>Menus that ship to your door.</span>
+        </button>
         <button type="button" class="hud-claim" id="btnClaimCta">
-          <strong>Claim a kitchen.</strong>
-          <span>Ship real food.</span>
+          <strong>Lease a kitchen</strong>
+          <span>$149–$399 / month.</span>
         </button>
 
         <button type="button" class="hud-board-link" id="btnBoard">View leaderboard</button>
@@ -130,7 +134,7 @@
         <div class="phone-menu" id="btnMenu" role="button" aria-label="Menu">Menu</div>
         <div class="phone-stick" id="stick"><i></i></div>
         <div class="phone-jump" id="touchJump" role="button">Jump</div>
-        <div class="phone-order" id="touchUse" role="button">Order Wilsons</div>
+        <div class="phone-order" id="touchUse" role="button">Restaurants</div>
       </div>
     </section>
   </main>
@@ -149,11 +153,15 @@
   <div class="enter-gate" id="enter" hidden>
     <div class="enter-card">
       <p class="boot-brand">kitchens<span>.</span></p>
-      <p class="enter-pitch">Walk the street. Order real food. We ship it to your door.</p>
-      <button type="button" id="btnEnter" class="hud-tap">
-        <strong>Walk in</strong>
-        <span class="desk-only">Click to enter in first person</span>
-        <span class="touch-only">Joystick to walk · drag to look · tap Order</span>
+      <p class="enter-pitch">A real food hall on the internet. Order from Wilsons — we ship to your door. Empty shops are for lease.</p>
+      <button type="button" id="btnBrowse" class="hud-tap">
+        <strong>See restaurants</strong>
+        <span>Order pizza · lease a storefront</span>
+      </button>
+      <button type="button" id="btnEnter" class="enter-walk hud-tap">
+        <strong>Walk the street</strong>
+        <span class="desk-only">First person · WASD</span>
+        <span class="touch-only">Joystick to walk · drag to look</span>
       </button>
       <div class="email-sign" id="emailSign">
         <p class="hud-kicker">The list</p>
@@ -316,6 +324,23 @@
           <button type="submit" class="btn btn-gold" id="btnPay">Pay with Stripe</button>
         </div>
       </form>
+    </div>
+  </aside>
+
+  <!-- Restaurant directory -->
+  <aside class="sheet sheet-wide" id="sheetGuide" hidden>
+    <div class="sheet-card">
+      <header>
+        <p class="hud-kicker">The hall</p>
+        <h2>Restaurants</h2>
+        <button type="button" class="sheet-close" data-close>×</button>
+      </header>
+      <p class="lede">Tap a shop to order. Food ships to your door. Empty kitchens are for lease.</p>
+      <div class="guide-list" id="guideList"></div>
+      <div class="guide-foot">
+        <button type="button" class="btn btn-gold" id="guideLease">Lease a kitchen</button>
+        <a class="btn btn-ghost" href="/my.html">I already have a shop</a>
+      </div>
     </div>
   </aside>
 

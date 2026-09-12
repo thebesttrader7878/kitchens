@@ -83,7 +83,8 @@ visualViewport?.addEventListener("scroll", resize);
 resize();
 
 bindTap(document.getElementById("btnFirstPerson"), () => setFirstPerson(!firstPerson));
-bindTap(document.getElementById("btnEnter"), () => walkIn());
+bindTap(document.getElementById("btnEnter"), () => walkIn({ browse: false }));
+bindTap(document.getElementById("btnBrowse"), () => walkIn({ browse: true }));
 document.getElementById("emailForm")?.addEventListener("submit", async (e) => {
   e.preventDefault();
   const input = document.getElementById("emailInput");
@@ -105,7 +106,7 @@ document.getElementById("emailForm")?.addEventListener("submit", async (e) => {
   }
 });
 
-async function walkIn() {
+async function walkIn({ browse } = {}) {
   entered = true;
   document.getElementById("enter").hidden = true;
   await ensureAudio();
@@ -118,6 +119,7 @@ async function walkIn() {
   }
   player.spawn();
   setFirstPerson(true);
+  if (browse) ui.openGuide();
 }
 document.getElementById("vol").oninput = (e) => setVolume(e.target.value);
 bindTap(document.getElementById("menuMusic"), async () => {
@@ -197,6 +199,9 @@ async function boot() {
   ui.setProgress(0.15);
   const remote = await fetchRemoteClaims();
   applyClaims(kitchens, remote);
+  ui.renderGuide();
+  ui.renderBoard();
+  ui.renderPlots();
   ui.setProgress(0.45);
   world.build(kitchens);
   ui.setProgress(0.8);
@@ -344,9 +349,14 @@ function setupTouch() {
     };
     el.addEventListener("touchstart", go, { passive: false });
   };
-  press(document.getElementById("touchUse"), () => ui.useNearby());
-  press(document.getElementById("btnMenu"), () => ui.open("sheetMenu"));
+  press(document.getElementById("touchUse"), () => {
+    if (ui.active) ui.openKitchen(ui.active);
+    else ui.openGuide();
+  });
+  press(document.getElementById("btnMenu"), () => ui.openGuide());
   press(document.getElementById("inspect"), () => ui.useNearby());
+  press(document.getElementById("btnBrowse"), () => walkIn({ browse: true }));
+  press(document.getElementById("guideLease"), () => ui.openClaim());
   press(document.getElementById("menuOrder"), () => ui.openKitchen(ui.flagship()));
   press(document.getElementById("menuClaim"), () => ui.openClaim());
   press(document.getElementById("menuBoard"), () => ui.openBoard());

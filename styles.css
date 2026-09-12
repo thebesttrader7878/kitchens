@@ -340,13 +340,53 @@ html.is-touch #phoneHud:not([hidden]) { display: contents; }
   padding: 12px 14px; font-size: 16px; width: 100%;
 }
 .email-status { color: var(--gold); font-size: 13px; margin: 10px 0 0; }
-.enter-gate #btnEnter {
+.enter-gate #btnEnter,
+.enter-gate #btnBrowse {
   background: var(--panel); color: var(--cream);
   border: 1px solid var(--line); padding: 18px 24px;
   text-align: center; width: 100%;
 }
-.enter-gate #btnEnter strong { display: block; font-family: var(--serif); font-size: 28px; }
-.enter-gate #btnEnter span { color: var(--muted); font-size: 13px; }
+.enter-gate #btnBrowse {
+  background: var(--gold);
+  color: #0c0b0a;
+  border: 0;
+}
+.enter-gate #btnBrowse strong,
+.enter-gate #btnEnter strong { display: block; font-family: var(--serif); font-size: 26px; }
+.enter-gate #btnBrowse span,
+.enter-gate #btnEnter span { color: inherit; opacity: 0.75; font-size: 13px; display: block; margin-top: 4px; }
+.enter-walk { opacity: 0.95; }
+
+.guide-list { display: grid; gap: 10px; margin: 16px 0; }
+.shop-card {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: 12px;
+  text-align: left;
+  background: #0c0b0a;
+  color: var(--cream);
+  border: 1px solid var(--line);
+  padding: 0;
+  overflow: hidden;
+  min-height: 88px;
+  width: 100%;
+}
+.shop-card-media {
+  min-height: 88px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.shop-card-media img { width: 100%; height: 100%; object-fit: cover; }
+.shop-card-media span { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--gold); }
+.shop-card-body { padding: 12px 12px 12px 0; display: grid; align-content: center; gap: 2px; }
+.shop-card-body strong { font-family: var(--serif); font-size: 18px; }
+.shop-card-body span { color: var(--muted); font-size: 13px; }
+.shop-card-body em { color: var(--gold); font-style: normal; font-size: 13px; font-weight: 600; margin-top: 4px; }
+.shop-card.is-flagship { border-color: var(--gold); }
+.shop-card.is-vacant .shop-card-media span { color: var(--cream); opacity: 0.7; }
+.guide-foot { display: grid; gap: 8px; margin-top: 8px; }
+.guide-foot .btn { margin-top: 0; }
 
 body.has-sheet .world-canvas,
 body.has-sheet .hud-layer,
@@ -424,6 +464,7 @@ body.has-sheet .parcel-inspection {
   display: grid; grid-template-columns: 88px 1fr auto; gap: 12px;
   align-items: center; border: 1px solid var(--line); padding: 10px;
 }
+.menu-item .btn { min-height: 44px; padding: 10px 12px; }
 .menu-item img { width: 88px; height: 88px; object-fit: cover; background: #222; }
 .menu-item h3 { margin: 0 0 4px; font-size: 15px; }
 .menu-item p { margin: 0; color: var(--muted); font-size: 12px; }
@@ -652,17 +693,17 @@ input[type="text"], input[type="email"], input[type="url"], input:not([type]) {
 
   .boot h1 { font-size: 28px; padding: 0 16px; }
   .enter-gate { padding: 16px; background: rgba(7,6,5,0.72); }
+  .enter-gate #btnBrowse,
   .enter-gate #btnEnter {
     width: 100%;
     padding: 18px 20px;
-    min-height: 72px;
+    min-height: 64px;
     border-radius: 16px;
-    background: var(--gold);
-    color: #0c0b0a;
-    border: 0;
   }
-  .enter-gate #btnEnter strong { font-size: 28px; color: #0c0b0a; }
-  .enter-gate #btnEnter span { display: block; margin-top: 6px; font-size: 14px; color: #3a341f; }
+  .enter-gate #btnBrowse strong { font-size: 26px; color: #0c0b0a; }
+  .enter-gate #btnBrowse span { color: #3a341f; }
+  .shop-card { min-height: 96px; }
+  .shop-card-media { min-height: 96px; }
   .email-sign { padding: 16px; }
   .email-sign strong { font-size: 20px; }
 

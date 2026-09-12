@@ -22,7 +22,9 @@ export class UI {
       sheetBoard: $("#sheetBoard"),
       sheetKitchen: $("#sheetKitchen"),
       sheetClaim: $("#sheetClaim"),
+      sheetGuide: $("#sheetGuide"),
       sheetMenu: $("#sheetMenu"),
+      guideList: $("#guideList"),
       chatDock: $("#chatDock"),
       boardList: $("#boardList"),
       plotGrid: $("#plotGrid"),
@@ -37,10 +39,12 @@ export class UI {
     this.touch = document.documentElement.classList.contains("is-touch");
     bindTap($("#btnAbout"), () => this.open("sheetAbout"));
     bindTap($("#btnBoard"), () => this.openBoard());
+    bindTap($("#btnGuideCta"), () => this.openGuide());
     bindTap($("#btnClaimCta"), () => this.openClaim());
+    bindTap($("#guideLease"), () => this.openClaim());
     bindTap($("#btnAboutClaim"), () => this.openClaim());
     bindTap($("#btnChat"), () => this.toggleChat());
-    bindTap($("#btnMenu"), () => this.open("sheetMenu"));
+    bindTap($("#btnMenu"), () => this.openGuide());
     bindTap($("#menuOrder"), () => this.openKitchen(this.flagship()));
     bindTap($("#menuClaim"), () => this.openClaim());
     bindTap($("#menuBoard"), () => this.openBoard());
@@ -76,9 +80,30 @@ export class UI {
 
     this.pendingLogo = "";
     this.bindLookFields();
+    this.bindGuide();
     this.seedChat();
     this.renderBoard();
     this.renderPlots();
+    this.renderGuide();
+  }
+
+  bindGuide() {
+    const list = this.els.guideList;
+    if (!list) return;
+    let last = 0;
+    const pick = (e) => {
+      const card = e.target.closest("[data-id]");
+      if (!card) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const now = performance.now();
+      if (now - last < 400) return;
+      last = now;
+      const k = this.kitchens.find((x) => x.id === card.dataset.id);
+      if (k) this.openKitchen(k);
+    };
+    list.addEventListener("click", pick);
+    list.addEventListener("touchstart", pick, { passive: false });
   }
 
   bindLookFields() {
@@ -136,10 +161,41 @@ export class UI {
     const use = document.getElementById("touchUse");
     if (!use) return;
     if (!k) {
-      use.textContent = "Order Wilsons";
+      use.textContent = "Restaurants";
       return;
     }
     use.textContent = k.status === "open" ? "Lease this" : `Order ${k.name}`;
+  }
+
+  openGuide() {
+    this.renderGuide();
+    this.open("sheetGuide");
+  }
+
+  renderGuide() {
+    const list = this.els.guideList;
+    if (!list) return;
+    const live = this.kitchens.filter((k) => k.status !== "open");
+    const vacant = this.kitchens.filter((k) => k.status === "open");
+    const card = (k) => {
+      const open = k.status === "open";
+      const hex = k.color ? `#${(k.color >>> 0).toString(16).padStart(6, "0")}` : "#3a342c";
+      const img = k.status === "flagship" ? WILSONS_MENU[0].image : (k.logo || "");
+      const cta = open ? "Lease this spot" : "View menu";
+      const meta = open
+        ? `For lease · $${PLAN_PRICE[k.plan]}/mo`
+        : `${k.cuisine || "Food"} · ships to your door`;
+      return `<button type="button" class="shop-card ${open ? "is-vacant" : ""} ${k.status === "flagship" ? "is-flagship" : ""}" data-id="${k.id}">
+        <div class="shop-card-media" style="background:${hex}">${img ? `<img src="${img}" alt="">` : `<span>${open ? "FOR LEASE" : (k.name || "").slice(0, 1)}</span>`}</div>
+        <div class="shop-card-body">
+          <p class="hud-kicker">Kitchen ${String(k.number).padStart(2, "0")}</p>
+          <strong>${escapeHtml(open ? "Available storefront" : k.name)}</strong>
+          <span>${escapeHtml(meta)}</span>
+          <em>${cta}</em>
+        </div>
+      </button>`;
+    };
+    list.innerHTML = live.map(card).join("") + vacant.map(card).join("");
   }
 
   inspect(k) {
@@ -196,7 +252,7 @@ export class UI {
               </div>
               <div>
                 <div class="price">${m.price}</div>
-                <a class="btn btn-red" style="margin-top:8px;padding:8px 10px;font-size:12px" href="${m.url}" target="_blank" rel="noopener">Ship this</a>
+                <a class="btn btn-red" href="${m.url}" target="_blank" rel="noopener">Ship to my door</a>
               </div>
             </article>`).join("")}
         </div>
@@ -333,7 +389,7 @@ export class UI {
   }
 
   closeAll() {
-    for (const id of ["sheetAbout", "sheetBoard", "sheetKitchen", "sheetClaim", "sheetMenu"]) {
+    for (const id of ["sheetAbout", "sheetBoard", "sheetKitchen", "sheetClaim", "sheetGuide", "sheetMenu"]) {
       if (this.els[id]) {
         this.els[id].hidden = true;
         this.els[id].classList.remove("is-open");
@@ -345,7 +401,7 @@ export class UI {
   }
 
   get sheetOpen() {
-    return ["sheetAbout", "sheetBoard", "sheetKitchen", "sheetClaim", "sheetMenu"].some(
+    return ["sheetAbout", "sheetBoard", "sheetKitchen", "sheetClaim", "sheetGuide", "sheetMenu"].some(
       (id) => this.els[id] && !this.els[id].hidden
     );
   }
